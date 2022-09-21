@@ -260,7 +260,43 @@ jobs:
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
-          template: basic_fail_1    
+          template: basic_fail_1
+
+  deploy-backend:
+    docker:
+      - image: python:3.9-alpine3.16
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["a6:e6:d7:80:a6:ee:5a:13:d1:a2:96:43:83:4e:bc:97"]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible && apk add --update nodejs npm
+            apk add --update rsync
+            apk add --update curl
+            pip install awscli
+            apk add --upgrade bash
+      - run:
+          name: Deploy backend
+          command: |
+            cd backend
+            npm i
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz ./
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
 
 
 workflows:
@@ -283,4 +319,6 @@ workflows:
       - run-migrations:
           requires: [configure-infrastructure]
       - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
           requires: [run-migrations]
