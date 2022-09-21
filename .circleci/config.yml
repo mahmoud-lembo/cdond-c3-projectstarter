@@ -354,7 +354,7 @@ jobs:
             sleep 30s
             if curl "${API_URL}/api/status" | grep "ok"
             then
-                exit 0
+                exit 1
             else
                 exit 1
             fi
@@ -425,9 +425,9 @@ jobs:
           command: |
             UnusedWorkflowID=$(curl --insecure https://kvdb.io/FTsqZPfnVefXhWGzpdQ6gN/udapeople )
             CircleWorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
-            if [[ "$CircleWorkflowID" != "$UnusedWorkflowID" ]]
+            if [[ "udapeople-$CircleWorkflowID" != "$UnusedWorkflowID" ]]
             then
-              aws s3 rm "s3://udapeople-${UnusedWorkflowID}" --recursive
+              aws s3 rm "s3://${UnusedWorkflowID}" --recursive
               aws cloudformation delete-stack --stack-name "udapeople-backend-${UnusedWorkflowID}"
               aws cloudformation delete-stack --stack-name "udapeople-frontend-${UnusedWorkflowID}"
             else
