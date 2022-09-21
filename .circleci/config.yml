@@ -430,6 +430,8 @@ jobs:
               aws s3 rm "s3://udapeople-${UnusedWorkflowID}" --recursive
               aws cloudformation delete-stack --stack-name "udapeople-backend-${UnusedWorkflowID}"
               aws cloudformation delete-stack --stack-name "udapeople-frontend-${UnusedWorkflowID}"
+            else
+              echo "No Stacks to Clear"
             fi
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
