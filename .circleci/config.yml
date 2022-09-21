@@ -421,7 +421,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Remove Unused Stacks
+          name: Get old stack workflow id and Remove old stacks and files
           command: |
             UnusedWorkflowID=$(curl --insecure https://kvdb.io/FTsqZPfnVefXhWGzpdQ6gN/udapeople )
             CircleWorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
