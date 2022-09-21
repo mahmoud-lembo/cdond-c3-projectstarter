@@ -330,6 +330,7 @@ jobs:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
           template: basic_fail_1
+
   smoke-test:
     docker:
       - image: python:3.9-alpine3.16
