@@ -437,6 +437,19 @@ jobs:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
           template: basic_fail_1
+          
+  previousworkflowid-update:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - run:
+          name: Save WorkflowID in Kvdb for the next cleanup job
+          command: |
+            curl --insecure "https://kvdb.io/FTsqZPfnVefXhWGzpdQ6gN/udapeople" -d "${CIRCLE_WORKFLOW_ID:0:7}"
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
 
 workflows:
   default:
@@ -470,3 +483,5 @@ workflows:
           requires: [smoke-test]
       - cleanup:
           requires: [cloudfront-update]
+      - previousworkflowid-update:
+          requires: [cleanup]
