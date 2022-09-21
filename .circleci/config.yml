@@ -17,6 +17,7 @@ commands:
           command: |
             aws cloudformation delete-stack --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
             aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
+            aws s3 rb s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --force
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
@@ -391,14 +392,6 @@ jobs:
             yum -y install tar
             yum -y install gzip
       - run:
-          name: Save WorkflowID in Kvdb for cleanup job
-          working_directory: ./.circleci/files
-          command: |
-            export UnusedWorkflowID=$(aws cloudformation \
-              list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-              --no-paginate --output text)
-            curl --insecure "https://kvdb.io/FTsqZPfnVefXhWGzpdQ6gN/udapeople" -d "$UnusedWorkflowID"
-      - run:
           name: Update cloudfront distribution
           command: |
             aws cloudformation deploy \
@@ -427,7 +420,7 @@ jobs:
             CircleWorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
             if [[ "udapeople-$CircleWorkflowID" != "$UnusedWorkflowID" ]]
             then
-              aws s3 rm "s3://${UnusedWorkflowID}" --recursive
+              aws s3 rb s3://udapeople-${UnusedWorkflowID} --force
               aws cloudformation delete-stack --stack-name "udapeople-backend-${UnusedWorkflowID}"
               aws cloudformation delete-stack --stack-name "udapeople-frontend-${UnusedWorkflowID}"
             else
